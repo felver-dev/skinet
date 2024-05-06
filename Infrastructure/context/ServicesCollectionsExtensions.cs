@@ -1,3 +1,4 @@
+using back.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace back.Infrastructure.context
