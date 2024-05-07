@@ -1,26 +1,24 @@
-using back.Core.Interfaces;
-using back.Helpers;
+using back.Extensions;
 using back.Infrastructure.context;
 using back.Infrastructure.Data;
+using back.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
-
 builder.Services.AddDatabase(builder.Configuration);
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.ApplicationServices(builder.Configuration);
 
 var app = builder.Build();
-
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-	app.UseSwagger();
-	app.UseSwaggerUI();
-}
+
+app.UseMiddleware<ExceptionMiddleware>();
+app.UseStatusCodePagesWithReExecute("/errors/{0}");
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseStaticFiles();
 app.UseAuthentication();
@@ -29,5 +27,4 @@ app.UseHttpsRedirection();
 app.MapControllers();
 
 StoreInitializer.Seed(app);
-
 app.Run();

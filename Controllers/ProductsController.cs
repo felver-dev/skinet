@@ -4,14 +4,13 @@ using back.Core.Entities;
 using back.Core.Interfaces;
 using back.Core.Specifications;
 using back.DTO;
+using back.Errors;
 using Microsoft.AspNetCore.Mvc;
 
 
-namespace back.Controllers
+namespace back.Controllers 
 {
-	[ApiController]
-	[Route("api/products")]
-	public class ProductsController : ControllerBase
+	public class ProductsController : BaseApiController
 	{
 
 		private readonly IGenericRepository<Product> product;
@@ -35,10 +34,14 @@ namespace back.Controllers
 		}
 		
 		[HttpGet("{id:int}")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<ProductToReturnDto>> GetProduct(int id)
 		{
 			var spec = new ProductWithTypesAndBrandsSpec(id);
 			var pdt = await product.GetEntityWithSpec(spec);
+
+			if (pdt == null) return NotFound(new ApiResponse(404));
 			return Ok(mapper.Map<ProductToReturnDto>(pdt));
 		}
 		
