@@ -10,6 +10,8 @@ namespace back.Extensions
 	{
 		public static IServiceCollection ApplicationServices(this IServiceCollection services, IConfiguration config)
 		{
+			string ClientURL = config["ClientUrl"];
+			
 			services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 			services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 			services.Configure<ApiBehaviorOptions>(options => 
@@ -30,6 +32,18 @@ namespace back.Extensions
 							return new BadRequestObjectResult(errorResponse);
 					};
 				});
+
+			services.AddCors(options =>
+			{
+				options.AddPolicy("CorsPolicy", policy =>
+				{
+					policy
+						.AllowAnyHeader()
+						.AllowAnyMethod()
+						.WithOrigins(ClientURL)
+						.AllowAnyOrigin();
+				});
+			});
 			return services;
 		}
 	}

@@ -5,6 +5,7 @@ using back.Core.Interfaces;
 using back.Core.Specifications;
 using back.DTO;
 using back.Errors;
+using back.Helpers;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -26,11 +27,17 @@ namespace back.Controllers
 		}
 		
 		[HttpGet]
-		public async Task<ActionResult<IReadOnlyList<ProductToReturnDto>>> GetProducts()
+		public async Task<ActionResult<Pagination<ProductToReturnDto>>> GetProducts([FromQuery]ProductSpecParams productParams)
 		{
-			var spec = new ProductWithTypesAndBrandsSpec();
-			var products = await product.ListAsync(spec);	
-			return Ok(mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductToReturnDto>>(products));
+			var spec = new ProductWithTypesAndBrandsSpec(productParams);
+			var countSpec = new ProductWithFiltersForCountSpec(productParams);
+			
+			var totalItems = await product.CountAsync(countSpec);
+			
+			var products = await product.ListAsync(spec);
+
+			var data = mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductToReturnDto>>(products);
+			return Ok(new Pagination<ProductToReturnDto>(productParams.PageIndex, productParams.PageSize, totalItems, data));
 		}
 		
 		[HttpGet("{id:int}")]

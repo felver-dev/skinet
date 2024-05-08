@@ -21,9 +21,14 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseStaticFiles();
+
+app.UseCors("CorsPolicy");
+
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.UseHttpsRedirection();
+
 app.MapControllers();
 
 StoreInitializer.Seed(app);
